@@ -1,99 +1,67 @@
 import React, { useState,useEffect} from "react";
-import { v4 as uuidv4 } from 'uuid';
-import { useId } from "react";
 import "../src/css/app.css"
+import data from './data'
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import Home from "./pages/Home";
-import pizzaImg from "./images/pizza.png"
 import Navbar from "./components/Navbar";
 import Cart from "./pages/customers/Cart";
 import Menu from "./pages/customers/Menu.jsx"
 import Footer from './components/Footer/footer';
 export default function App() {
  
-  const [filter,setFilter]=useState("");
-  const [value, setValue] = useState(0);
-  const [pizzas,setPizzas]=useState([{
-    id:uuidv4(),
-    name: "Margherita",
-    image:pizzaImg,
-    price:250,
-    size: "small"
-  },{
-    id:uuidv4(),
-    name: "Marinara",
-    image:pizzaImg,
-    price: 300,
-    size: "medium"
-  },{
-    id:uuidv4(),
-    name: "Marinara",
-    image:pizzaImg,
-    price: 300,
-    size: "medium"
-  },{
-    id:uuidv4(),
-    name: "Marinara",
-    image:pizzaImg,
-    price: 300,
-    size: "medium"
-  },{
-    id:uuidv4(),
-    name: "Marinara",
-    image:pizzaImg,
-    price: 300,
-    size: "medium"
-  },{
-    id:uuidv4(),
-    name: "Marinara",
-    image:pizzaImg,
-    price: 300,
-    size: "medium"
-  },{
-    id:uuidv4(),
-    name: "Carbonara",
-    image:pizzaImg,
-    price:200,
-    size: "small"
-  },{
-    id:uuidv4(),
-    name: "Carbonara",
-    image:pizzaImg,
-    price:200,
-    size: "small"
-  }]
-    
-  )
  
+  const {pizzas} = data;
+  const [cartItems, setCartItems] = useState([]);
+  const onAdd = (pizza) => {
+    const exist = cartItems.find((x) => x.id === pizza.id);
+    if (exist) {
+      
+      const newCartItems=cartItems.map((x) =>
+          x.id ===pizza.id ? { ...exist, qty: exist.qty + 1 } : x
+        )
+      ;
+      setCartItems(newCartItems);
+      localStorage.setItem('cartItems', JSON.stringify(newCartItems))
+    } else {
+      const newCartItems =[...cartItems,{...pizza,qty:1}]
+      setCartItems([...cartItems, { ...pizza, qty: 1 }]);
+      localStorage.setItem('cartItems', JSON.stringify(newCartItems));
+    }
+  };
+  const onRemove = (pizza) => {
+    const exist = cartItems.find((x) => x.id === pizza.id);
+    if (exist.qty === 1) {
+      const newCartItems = cartItems.filter((x)=>x.id!==pizza.id);
+      setCartItems(newCartItems);
+      localStorage.setItem('cartItems', JSON.stringify(newCartItems));
+
+    } else {
+      const newCartItems=cartItems.map((x) =>
+          x.id === pizza.id ? { ...exist, qty: exist.qty - 1 } : x
+        );
+      setCartItems(newCartItems)
+      localStorage.setItem('cartItems', JSON.stringify(newCartItems));
+    }
+  };
   useEffect(()=>{
-    JSON.parse(localStorage.getItem('my-app'));
-  }
- )
-  useEffect(()=>{
-    localStorage.setItem('my-app',JSON.stringify(pizzas))
-  })
+    setCartItems(localStorage.getItem('cartItems')?JSON.parse(localStorage.getItem('cartItems')):[]);
+  },[])
   return (
     <BrowserRouter>
+    
       <Routes>
-      <Route path="/" element={<><Home/><Footer/></>} />
-        <Route path="/register" element={<><Register /><Footer/></>} />
-        <Route path="/cart/:id" element={<><Cart /><Footer/></>} />
-        <Route path="/login" element={<>
-          <Login>
-          <Navbar count={Number(window.localStorage.getItem('count'))} />
-        </Login>
-          <Footer/>
-        </>
-      }  />
-        <Route path="/menu"  element={<>
-          <Menu menu={pizzas}/>
-          <Footer/>
-        </>} />
+        <Route path="/" element={<><Navbar countCartItems={cartItems.length}/><Home/></>} />
+        <Route path="/register" element={<><Register /></>} />
+        <Route path="/cart" element={<><Navbar countCartItems={cartItems.length}/><Cart cartItems={cartItems} onAdd={onAdd} onRemove={onRemove}/></>} />
+        <Route path="/login" element={<Login><Navbar/></Login>}/>
+        <Route path="/menu"  element={
+         <><Navbar countCartItems={cartItems.length}/><Menu pizza={pizzas} cartItems={cartItems} onAdd={onAdd} onRemove={onRemove}/></>}/>
       
         
       </Routes>
+      <Footer/>
     </BrowserRouter>
   );
 }

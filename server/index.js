@@ -4,10 +4,6 @@ const mongoose = require("mongoose");
 const authRoutes = require("./routes/auth");
 const path = require('path')
 const ejs = require('ejs')
-const session = require('express-session');
-// const MongoDbStore = require('connect-mongo')(session);
-// const passport = require('passport')
-const Emitter = require('events')
 const app = express();
 const socket = require("socket.io");
 require("dotenv").config();
@@ -35,7 +31,6 @@ mongoose
 
 app.use("/api/auth",authRoutes);
 
-
 const server = app.listen(process.env.PORT, () =>
   console.log(`Server started on ${process.env.PORT}`)
 );
@@ -46,17 +41,4 @@ const io = socket(server, {
   },
 });
 
-global.onlineUsers = new Map();
-io.on("connection", (socket) => {
-  global.chatSocket = socket;
-  socket.on("add-user", (userId) => {
-    onlineUsers.set(userId, socket.id);
-  });
 
-  socket.on("send-msg", (data) => {
-    const sendUserSocket = onlineUsers.get(data.to);
-    if (sendUserSocket) {
-      socket.to(sendUserSocket).emit("msg-recieve", data.msg);
-    }
-  });
-});

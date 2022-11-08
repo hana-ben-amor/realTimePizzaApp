@@ -1,12 +1,7 @@
 import React from 'react'
 import heroPizza from "../assets/pizza-loader.gif"
-import pizza from "../images/pizza.png"
-import styled from "styled-components";
-import Logout from './auth/Logout'
-import Navbar from '../components/Navbar';
  export default function Home() {
   return (<>
- <Navbar count={Number(window.localStorage.getItem('count'))}/> 
     <section className="hero py-16">
             <div className="container mx-auto flex items-center justify-between" style={{padding:40}}>
                 <div className="w-1/3" style={{marginLeft:"10%"}}>
